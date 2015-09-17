@@ -25,7 +25,6 @@ def mapper(record):
     for k in range(0, cols):
       value_list = ["A", j, Aij]
       mr.emit_intermediate((i,k), value_list)
-      #print (i,k), value_list
     #for matrix "B"
     j = record[0]
     k = record[1]
@@ -33,7 +32,6 @@ def mapper(record):
     for i in range(0, rows):
         value_list = ["B", j, Bjk]
         mr.emit_intermediate((i,k), value_list)
-        #print (j,k), value_list
 
 def reducer(key, list_of_values):
     # key: word
@@ -61,7 +59,6 @@ def reducer(key, list_of_values):
         res_element += element
 
     mr.emit([key[0], key[1], res_element])
-    #mr.emit((key, total))
 
 # Do not modify below this line
 # =============================
