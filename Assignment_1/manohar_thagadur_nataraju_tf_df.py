@@ -12,8 +12,6 @@ mr = MapReduce.MapReduce()
 # Do not modify above this line
 
 def mapper(record):
-    # key: document identifier
-    # value: document contents
     doc_id = record[0]
     document = record[1]
     #words = value.split()
@@ -27,8 +25,6 @@ def mapper(record):
         mr.emit_intermediate(word, doc_tuple)
 
 def reducer(key, doc_tuple_list):
-    # key: word
-    # value: list of occurrence counts
     term_list = []
     doc_dict = {}
     for doc_id, val in doc_tuple_list:

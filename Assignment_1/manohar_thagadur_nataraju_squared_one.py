@@ -34,8 +34,6 @@ def mapper(record):
         mr.emit_intermediate((i,k), value_list)
 
 def reducer(key, list_of_values):
-    # key: word
-    # value: list of occurrence counts
     j_list = []
     j_dict = {}
 

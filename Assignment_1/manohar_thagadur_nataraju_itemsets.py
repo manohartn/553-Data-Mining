@@ -12,8 +12,6 @@ mr = MapReduce.MapReduce()
 # Do not modify above this line
 
 def mapper(record):
-    # key: document identifier
-    # value: document contents
     length = len(record)
     for i in range(len(record)):
         for j in range(i+1, len(record)):
@@ -21,8 +19,6 @@ def mapper(record):
             mr.emit_intermediate(key, 1)
 
 def reducer(key, list_of_values):
-    # key: word
-    # value: list of occurrence counts
     total = 0
     for v in list_of_values:
       total += v
