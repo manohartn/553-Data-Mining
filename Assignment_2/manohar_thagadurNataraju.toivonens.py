@@ -56,11 +56,25 @@ def get_k_subsets(inputList, k):
     return k_subsets
 
 
-def get_candidate_item_list(sampled_input, prob, support, k, freq_item_list):
+def get_all_cand_from_sample(sampled_input, support, k):
+    count_dict = {}
+    all_cand_from_sample = []
+
+    for subList in sampled_input:
+        k_subsets = get_k_subsets(subList, k)
+        for itemA in k_subsets:
+            count_dict.setdefault(itemA, 0)
+            count_dict[itemA] = count_dict[itemA] + 1
+            if count_dict[itemA] >= support:
+                if itemA not in all_cand_from_sample:
+                    all_cand_from_sample.append(itemA)
+    return all_cand_from_sample
+
+def get_candidate_item_list(sampled_input, prob, support, k, prev_Lk_list):
     
     candidate_item_freq_list = []
     count_dict = {}
-    current_freq_list = []
+    CK_list = []
 
     if k == 1:
         for subList in sampled_input:
@@ -74,22 +88,43 @@ def get_candidate_item_list(sampled_input, prob, support, k, freq_item_list):
                     if appendItem[0] not in candidate_item_freq_list:
                         candidate_item_freq_list.append(appendItem[0])
    
+        for k,v in count_dict.iteritems():
+            CK_list.append(k)
+        CK_list = sorted(CK_list)
     else:
-        cand_singleton = get_singleton(freq_item_list)
+        if k > 2:
+            cand_singleton = get_singleton_from_list(prev_Lk_list)
+        else:
+            cand_singleton = prev_Lk_list
+        #print "cand singleton "
+        #print cand_singleton
         k_subsets = get_k_subsets(cand_singleton, k)
-        if k == 2:
-            pass
+        for itemA in k_subsets:
+            k_minus_1_subsets = get_k_subsets(list(itemA), k-1)
+            flag = 1
+            for itemB in k_minus_1_subsets:
+                checkItem = list(itemB)
+                if len(checkItem) == 1:
+                    appendItem = checkItem[0] 
+                else:
+                    appendItem = itemB
+                if appendItem not in prev_Lk_list:
+                    flag = 0
+            if flag == 1:
+                CK_list.append(itemA)
+
+        CK_list = sorted(CK_list)
+        all_cand_sample_list = get_all_cand_from_sample(sampled_input, support, k)
+        for item in all_cand_sample_list:
+            if item in CK_list:
+                candidate_item_freq_list.append(item)
+
     candidate_item_freq_list = sorted(candidate_item_freq_list)
-    print "cand:"
-    print candidate_item_freq_list
+    #print candidate_item_freq_list
     #print candidate_item_list
     #print len(candidate_item_list)
 
-    all_candidate_list = []
-    for k,v in count_dict.iteritems():
-       all_candidate_list.append(k)
-    all_candidate_list = sorted(all_candidate_list)
-    return (candidate_item_freq_list, all_candidate_list)
+    return (candidate_item_freq_list, CK_list)
                
 def get_truly_freq_list(input_path, support, k, probability, candidate_item_list):
 
@@ -114,19 +149,21 @@ def get_truly_freq_list(input_path, support, k, probability, candidate_item_list
     #print truly_freq_list
     return truly_freq_list
 
-def find_freq_item_list(input_path, sampled_input, probability, scaled_support, original_support, k, freq_item_list):
-    candidate_freq_item_list, all_candidate_list = get_candidate_item_list(sampled_input, probability, scaled_support, k, freq_item_list)
-    
+def find_freq_item_list(input_path, sampled_input, probability, scaled_support, original_support, k, prev_Lk_list):
+    candidate_freq_item_list, CK_list = get_candidate_item_list(sampled_input, probability, scaled_support, k, prev_Lk_list)
+   
+
+    whole_data_set_freq_item_list = []
+
     #Compute Negative border
     neg_border_list = []
-    for itemA in all_candidate_list:
+    for itemA in CK_list:
         flag = 1
         if itemA not in candidate_freq_item_list:
 	    if k == 1:
 	        neg_border_list.append(itemA)
 	    else:
 	        k_minus_one_subset = get_k_subsets(itemA, k-1)
-	        flag = 1
 	        for itemB in k_minus_one_subset:
 	            if itemB not in candidate_freq_item_list:
 	                flag = 0
@@ -137,22 +174,26 @@ def find_freq_item_list(input_path, sampled_input, probability, scaled_support, 
     
     #compute for whole data set
     inputFileObj = open(input_path)
-    whole_data_set_freq_items = []
     count_dict = {}
+    whole_data_set_freq_items = []
 
     for line in inputFileObj:
         line = tokenize(line)
        
 	k_subset = get_k_subsets(line, k)
-	if k == 1:
-	    for itemA in k_subset:
-	        checkItem = list(itemA)
-	        if checkItem[0] in neg_border_list or checkItem[0] in candidate_freq_item_list:
-	            count_dict.setdefault(checkItem[0], 0)
-	            count_dict[checkItem[0]] = count_dict[checkItem[0]] + 1
-	            if count_dict[checkItem[0]] >= original_support:
-	                if checkItem[0] not in whole_data_set_freq_items:
-	                    whole_data_set_freq_items.append(checkItem[0])
+	for itemA in k_subset:
+	    checkItem = list(itemA)
+            if k == 1:
+                actual_append_item = checkItem[0]
+            else:
+                actual_append_item = itemA                
+
+	    if actual_append_item in neg_border_list or actual_append_item in candidate_freq_item_list:
+	        count_dict.setdefault(actual_append_item, 0)
+	        count_dict[actual_append_item] = count_dict[actual_append_item] + 1
+	        if count_dict[actual_append_item] >= original_support:
+	                if actual_append_item not in whole_data_set_freq_items:
+	                    whole_data_set_freq_items.append(actual_append_item)
 
     repeat = 0
     for item in neg_border_list:
@@ -160,20 +201,32 @@ def find_freq_item_list(input_path, sampled_input, probability, scaled_support, 
             repeat = 1
 
     whole_data_set_freq_items = sorted(whole_data_set_freq_items)
-    print "neg" 
-    print neg_border_list
-    print whole_data_set_freq_items
 
-    return (candidate_freq_item_list, repeat)
+    #print "neg" 
+    #print neg_border_list
+    #print "whole"
+    #print whole_data_set_freq_items
+
+    return (whole_data_set_freq_items, repeat, candidate_freq_item_list)
 
 def get_random_list(req_range, total_sample_size):
     random_list = random.sample(xrange(1, req_range), total_sample_size)
     return random_list
 
+def get_singleton_from_list(Lk_list):
+    singleton = []
+    for itemA in Lk_list:
+        list_itemA = list(itemA)
+        for itemB in list_itemA:
+            if itemB not in singleton:
+                singleton.append(itemB)
+    singleton = sorted(singleton)
+    return singleton
+
 def main():
     args_len = len(sys.argv)
     if (args_len !=3):
-        print "Usage: python <source_file> <input_file> <SUPPORT>"
+        print "Usage: python <source_5file> <input_file> <SUPPORT>"
         sys.exit()
 
     input_path = sys.argv[1]
@@ -201,25 +254,53 @@ def main():
     #print "rand list : ", random_list
     #start from k=2
     k = 1
-    freq_item_list = []
+    _whole_data_freq_item_list = []
+    whole_data_set_freq_items = []
     repeat = 0
     total_iter = 1
     scaled_support = 0.8*probability*support
-    #while k == 1 or len(freq_item_list) > 0:
-    while k == 1 or repeat:
+    while k == 1 or len(whole_data_set_freq_items) > 0:
         if repeat or k == 1:
             total_iter = total_iter + 1
             k = 1
             _sampled_input = []
-            freq_item_list = []
+            prev_Lk_list = []
+            whole_data_set_freq_items = []
+            _whole_data_freq_item_list = []
             random_list = get_random_list(req_range, total_sample_size)
             _sampled_input = get_sampled_input(input_path, random_list)
             #print _sampled_input
-        freq_item_list, repeat = find_freq_item_list(input_path, _sampled_input, probability, scaled_support, support, k, freq_item_list)
-        if repeat == 0:
-            pass
+        whole_data_set_freq_items = []
+        whole_data_set_freq_items, repeat, prev_Lk_list = find_freq_item_list(input_path, _sampled_input, probability, scaled_support, support, k, prev_Lk_list)
+        if repeat == 1:
+            k = 1
             #print freq_item_list
-        k = k + 1
+        else:
+            k = k + 1
+            if len(whole_data_set_freq_items) > 0:
+        #copy all items in whole_data to _whole_data list to be used for printing later
+                for item in whole_data_set_freq_items:
+                    list_item = list(item)
+                    _whole_data_freq_item_list.append(list_item)
+    
+    #print "=== whole === "
+
+    # === print the required output ====
+    print total_iter
+    print probability
+
+    #start printing from size=1
+    size = 1
+    print_list = []
+    while size == 1 or len(print_list) > 0:
+        print_list = []
+        for item in _whole_data_freq_item_list:
+            if len(item) == size:
+                print_list.append(item)
+        if len(print_list) > 0:
+            print print_list
+            print
+        size = size + 1
 
 if __name__ == '__main__':
     main()
