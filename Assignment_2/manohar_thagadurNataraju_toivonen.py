@@ -257,8 +257,9 @@ def main():
             if len(item) == size:
                 print_list.append(item)
         if len(print_list) > 0:
+            if size != 1:
+                print
             print print_list
-            print
         size = size + 1
 
 if __name__ == '__main__':
