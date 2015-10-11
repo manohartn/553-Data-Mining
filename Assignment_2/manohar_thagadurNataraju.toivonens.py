@@ -2,14 +2,6 @@ import sys
 import itertools
 import random
 
-def get_hash_value(itemTuple, hashBucketSize):
-    #hashFunc = sum of all the values of chars in the tuple % 20
-    sum = 0
-    for i in range(0, len(itemTuple)):
-        sum = sum + ord(itemTuple[i]) - 96
-    hash_val = sum % hashBucketSize
-    return hash_val
-
 def get_sampled_input(inputPath, random_list):
     sampled_input = []
     inputFileObj = open(inputPath)
@@ -28,29 +20,6 @@ def tokenize(text):
     text = sorted(text)
     return text
 
-def find_freq_singletons(input_path, support):
-    inputFileObj = open(input_path)
-    singleton_dict = {}
-    freq_singleton_list = []
-    all_singleton_list = []
-    
-    for line in inputFileObj:
-        line = tokenize(line)
-
-        for item in line:
-            singleton_dict.setdefault(item, 0)
-            count = singleton_dict[item]
-            singleton_dict[item] = count+1
-            if singleton_dict[item] >= support:
-                 if item not in freq_singleton_list:
-                     freq_singleton_list.append(item)
-
-    freq_singleton_list = sorted(freq_singleton_list)
-
-    #print singleton_dict
-    inputFileObj.close()
-    return freq_singleton_list
-       
 def get_k_subsets(inputList, k):
     k_subsets = itertools.combinations(inputList, k)
     return k_subsets
@@ -127,38 +96,12 @@ def get_candidate_item_list(sampled_input, prob, support, k, prev_Lk_list):
                 candidate_item_freq_list.append(item)
 
     candidate_item_freq_list = sorted(candidate_item_freq_list)
-    #print candidate_item_freq_list
-    #print candidate_item_list
-    #print len(candidate_item_list)
 
     #print "CK : ", CK_list
     #print
     #print "LK : ", candidate_item_freq_list
     return (candidate_item_freq_list, CK_list)
                
-def get_truly_freq_list(input_path, support, k, probability, candidate_item_list):
-
-    inputFileObj = open(input_path)
-    candidate_item_dict = {}
-    truly_freq_list = []
-
-    for line in inputFileObj:
-        line = tokenize(line, probability)
-
-        k_subsets = get_k_subsets(line, k)
-        for item in k_subsets:
-            if list(item) in candidate_item_list:
-                candidate_item_dict.setdefault(item, 0)
-                candidate_item_dict[item] = candidate_item_dict[item] + 1
-
-                if candidate_item_dict[item] >= support:
-                    if list(item) not in truly_freq_list:
-                        truly_freq_list.append(list(item))
-
-    truly_freq_list = sorted(truly_freq_list)
-    #print truly_freq_list
-    return truly_freq_list
-
 def find_freq_item_list(input_path, sampled_input, probability, scaled_support, original_support, k, prev_Lk_list):
     candidate_freq_item_list, CK_list = get_candidate_item_list(sampled_input, probability, scaled_support, k, prev_Lk_list)
    
