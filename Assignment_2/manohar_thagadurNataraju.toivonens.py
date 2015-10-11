@@ -57,6 +57,7 @@ def get_k_subsets(inputList, k):
 
 
 def get_all_cand_from_sample(sampled_input, support, k):
+    #print "scaled_support", support
     count_dict = {}
     all_cand_from_sample = []
 
@@ -68,6 +69,10 @@ def get_all_cand_from_sample(sampled_input, support, k):
             if count_dict[itemA] >= support:
                 if itemA not in all_cand_from_sample:
                     all_cand_from_sample.append(itemA)
+    #print count_dict
+
+    '''for k, v in count_dict.iteritems():
+        print k, " : ", v'''
     return all_cand_from_sample
 
 def get_candidate_item_list(sampled_input, prob, support, k, prev_Lk_list):
@@ -114,6 +119,8 @@ def get_candidate_item_list(sampled_input, prob, support, k, prev_Lk_list):
                 CK_list.append(itemA)
 
         CK_list = sorted(CK_list)
+        #print "CK"
+        #print CK_list
         all_cand_sample_list = get_all_cand_from_sample(sampled_input, support, k)
         for item in all_cand_sample_list:
             if item in CK_list:
@@ -124,6 +131,9 @@ def get_candidate_item_list(sampled_input, prob, support, k, prev_Lk_list):
     #print candidate_item_list
     #print len(candidate_item_list)
 
+    #print "CK : ", CK_list
+    #print
+    #print "LK : ", candidate_item_freq_list
     return (candidate_item_freq_list, CK_list)
                
 def get_truly_freq_list(input_path, support, k, probability, candidate_item_list):
@@ -160,17 +170,23 @@ def find_freq_item_list(input_path, sampled_input, probability, scaled_support, 
     for itemA in CK_list:
         flag = 1
         if itemA not in candidate_freq_item_list:
+            #print "pnbl ", itemA
 	    if k == 1:
 	        neg_border_list.append(itemA)
 	    else:
 	        k_minus_one_subset = get_k_subsets(itemA, k-1)
 	        for itemB in k_minus_one_subset:
-	            if itemB not in candidate_freq_item_list:
+                    if k-1 == 1:
+                        listItem = list(itemB)
+                        checkItem = listItem[0]
+                    else:
+                        checkItem = itemB
+	            if checkItem not in prev_Lk_list:
 	                flag = 0
                 if flag == 1:
 	            neg_border_list.append(itemA)
 
-    #print neg_border_list
+    #print "NBL : ", neg_border_list
     
     #compute for whole data set
     inputFileObj = open(input_path)
