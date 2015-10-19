@@ -81,6 +81,51 @@ def print_required_output(k_nearest_neighbour_list, predicted_rating):
     print "\n"
     print predicted_rating
             
+
+def get_from_file_to_list(ratings_file):
+    inputFileObj = open(ratings_file)
+
+    input_list = []
+    for line in inputFileObj:
+        line = line.rstrip('\n')
+        entry_in_list = line.split('\t')
+
+        input_list.append(entry_in_list)
+
+    inputFileObj.close()
+    return input_list
+
+def get_user_item_dict(input_list):
+    user_item_dict = {}
+    user_avg_rating_dict = {} 
+    map_user_avgRating = {}
+
+    for item in input_list:
+        user_id = item[0]
+        rating = float(item[1])
+        movie_name = item[2]
+
+        item_aggr_dict = {}
+        user_item_dict.setdefault(user_id, item_aggr_dict)
+        user_item_dict[user_id].setdefault(movie_name, rating)
+
+        rating_itemCount_list = [0, 0]
+        user_avg_rating_dict.setdefault(user_id, rating_itemCount_list)
+        
+        rating_sum = user_avg_rating_dict[user_id][0]
+        rating_sum += rating
+        movie_count = user_avg_rating_dict[user_id][1]
+        movie_count += 1
+
+        user_avg_rating_dict[user_id][0] = rating_sum
+        user_avg_rating_dict[user_id][1] = movie_count
+
+    for key,val in user_avg_rating_dict.iteritems():
+        map_user_avgRating.setdefault(key, 0.0)
+        avg = float(val[0]/val[1])
+        map_user_avgRating[key] = avg
+    return (user_item_dict, map_user_avgRating)
+
 def main():
     args_len = len(sys.argv)
     if args_len != 5:
@@ -145,52 +190,6 @@ def main():
     '''
 
     print_required_output(k_nearest_neighbour_list, predicted_rating)
-
-def get_from_file_to_list(ratings_file):
-    inputFileObj = open(ratings_file)
-
-    input_list = []
-    for line in inputFileObj:
-        line = line.rstrip('\n')
-        entry_in_list = line.split('\t')
-
-        input_list.append(entry_in_list)
-
-    inputFileObj.close()
-    return input_list
-
-def get_user_item_dict(input_list):
-    user_item_dict = {}
-    user_avg_rating_dict = {} 
-    map_user_avgRating = {}
-
-    for item in input_list:
-        user_id = item[0]
-        rating = float(item[1])
-        movie_name = item[2]
-
-        item_aggr_dict = {}
-        user_item_dict.setdefault(user_id, item_aggr_dict)
-        user_item_dict[user_id].setdefault(movie_name, rating)
-
-        rating_itemCount_list = [0, 0]
-        user_avg_rating_dict.setdefault(user_id, rating_itemCount_list)
-        
-        rating_sum = user_avg_rating_dict[user_id][0]
-        rating_sum += rating
-        movie_count = user_avg_rating_dict[user_id][1]
-        movie_count += 1
-
-        user_avg_rating_dict[user_id][0] = rating_sum
-        user_avg_rating_dict[user_id][1] = movie_count
-
-    for key,val in user_avg_rating_dict.iteritems():
-        map_user_avgRating.setdefault(key, 0.0)
-        avg = float(val[0]/val[1])
-        map_user_avgRating[key] = avg
-    return (user_item_dict, map_user_avgRating)
-
-
 
 if __name__ == "__main__":
     main()
