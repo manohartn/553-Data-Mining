@@ -22,9 +22,11 @@ def get_K_nearest_neighbours(pearson_coeff_dict, K):
 
     user_pearsonVal_list = zip(otherUsers_pearsonValue_list, otherUsers_list)
 
-    user_pearsonVal_listi_sorted = sorted(user_pearsonVal_list)
+    #user_pearsonVal_list_sorted = sorted(user_pearsonVal_list)
 
-    neighbour_list = [(user,val) for val,user in user_pearsonVal_listi_sorted]
+    user_pearsonVal_list_sorted = sorted(user_pearsonVal_list, key=lambda x:(-x[0], x[1]))
+
+    neighbour_list = [(user,val) for val,user in user_pearsonVal_list_sorted]
 
     # print val and user in user_pearsonVal_list
     '''
@@ -32,9 +34,8 @@ def get_K_nearest_neighbours(pearson_coeff_dict, K):
         print user, " : " , val
     '''
     #get top k neighbour_list
-
-    # list is sorted in ascending order, so to get top k, get k from other side
-    k_nearest_neighbour_list = neighbour_list[-K:]
+    # list is sorted in descending order, so to get top k
+    k_nearest_neighbour_list = neighbour_list[:K]
     return k_nearest_neighbour_list
 
 def get_pearson_coefficient_util(userA, userA_avgRating, userA_movie_rating_dict, userB, userB_avgRating, userB_movie_rating_dict):
@@ -77,7 +78,7 @@ def get_pearson_coeff_dict(input_user, user_item_dict, user_avg_rating_dict):
 def print_required_output(k_nearest_neighbour_list, predicted_rating):
 
     for user_name, pearson_val in k_nearest_neighbour_list:
-        print user_name, " ", pearson_val
+        print user_name, pearson_val
     print "\n"
     print predicted_rating
             
