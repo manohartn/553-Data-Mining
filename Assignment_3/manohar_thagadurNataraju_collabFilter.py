@@ -12,7 +12,10 @@ def predict_rating(user, item, k_nearest_neighbours, user_item_dict):
             numerator += (neighbour_similarity_val * neighbour_user_movie_rating_dict[item])
             denominator += neighbour_similarity_val
 
-    predicted_rating = float(numerator/denominator)
+    if denominator == 0:
+        predicted_rating = 0
+    else:
+        predicted_rating = float(numerator/denominator)
 
     return predicted_rating
 
@@ -56,7 +59,10 @@ def get_pearson_coefficient_util(userA, userA_avgRating, userA_movie_rating_dict
             denominator_part2 += math.pow(userB_rating_normalize, 2)
 
     denominator = math.sqrt(denominator_part1) * math.sqrt(denominator_part2)
-    pearson_coeff_val = float(numerator/denominator)
+    if denominator == 0:
+        pearson_coeff_val = 0
+    else:
+        pearson_coeff_val = float(numerator/denominator)
 
     return pearson_coeff_val
 
