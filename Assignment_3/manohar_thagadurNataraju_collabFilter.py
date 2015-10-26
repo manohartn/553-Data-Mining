@@ -27,7 +27,7 @@ def get_K_nearest_neighbours(pearson_coeff_dict, K):
 
     #user_pearsonVal_list_sorted = sorted(user_pearsonVal_list)
 
-    user_pearsonVal_list_sorted = sorted(user_pearsonVal_list, key=lambda x:(-x[0], x[1]))
+    user_pearsonVal_list_sorted = sorted(user_pearsonVal_list, key=lambda x:(x[0], x[0]), reverse=True)
 
     neighbour_list = [(user,val) for val,user in user_pearsonVal_list_sorted]
 
