@@ -187,7 +187,7 @@ def main():
     #testHeap(pointsHeap)
     #print pointsHeap
     actualClusterDict = {}
-    k = 150
+    k = total_clusters
     while len(nonVisitedList) > 1:
 
         minItem = heapq.heappop(pointsHeap)
@@ -207,6 +207,7 @@ def main():
             actualClusterList = []
             actualClusterList = copy.copy(nonVisitedList)
 	    actualClusterDict[k] = actualClusterList
+            #print actualClusterList
             k = k-1
 
 	    nonVisitedList.remove(clusterA)
@@ -218,12 +219,18 @@ def main():
 
             computeEuDistance_AddHeap(0, 1, pointsList, pointsHeap, nonVisitedList, nDimensionLength)
 
+    #Verify dictionary
+    '''
+    for key, values in actualClusterDict.iteritems():
+        print key, values
+    '''
+
     precision, recall = getPrecisionAndRecall(actualClusterDict, goldStandardDict, clustersDesired)
 
     print precision
     print recall
 
-    actualPrintList = actualClusterDict[clustersDesired]
+    actualPrintList = sorted(actualClusterDict[clustersDesired])
     for item in actualPrintList:
         print sorted(item)
 
