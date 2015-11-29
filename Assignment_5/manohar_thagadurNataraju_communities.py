@@ -16,23 +16,22 @@ def draw_graph(graph, communities, imageFile):
         a = 1
         b = 125000
         rand_no = random.randint(a, b)*5
-        print rand_no
         for node in community:
             normalized_rand = rand_no
             val_map[node] = normalized_rand
-        a = 543*normalized_rand
+        a = 543*normalized_rand # have used some random values to have a significant range change to the previous color
         b = 658*normalized_rand
-    print val_map
+    #print val_map
 
     values = []
     for node in graph.nodes():
         values.append(val_map.get(node, 0.25))
-    print values
+    #print values
 
     nx.draw_networkx(graph, cmap = plt.get_cmap('jet'), node_color = values)
     plt.axis('off')
     plt.savefig(imageFile)
-    plt.show()
+    #plt.show()
 
 def get_betweenness(graph):
     return nx.edge_betweenness(graph)
@@ -48,6 +47,10 @@ def readFileToGraph(inputFile):
         #print edgeList
         graph.add_edge(int(edgeList[0]), int(edgeList[1]))
     return graph
+
+def printAllCommunities(communities):
+    for each_community in communities:
+        print each_community
 
 def main():
     args_len = len(sys.argv)
@@ -107,8 +110,9 @@ def main():
         #print graph.edges()
         #print graph.nodes()
     communities = sorted(communities, key=itemgetter(0))
-    print communities
+    #print communities
     
+    printAllCommunities(communities)
     draw_graph(graphCopy, communities, imageFile)
 
 if __name__ == "__main__":
