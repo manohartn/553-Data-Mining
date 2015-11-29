@@ -50,7 +50,7 @@ def readFileToGraph(inputFile):
 
 def printAllCommunities(communities):
     for each_community in communities:
-        print each_community
+        print repr(each_community).replace(' ', '')
 
 def main():
     args_len = len(sys.argv)
