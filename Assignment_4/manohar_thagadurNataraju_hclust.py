@@ -225,6 +225,7 @@ def main():
         print key, values
     '''
 
+    actualClusterDict[k] = sorted(nonVisitedList)
     precision, recall = getPrecisionAndRecall(actualClusterDict, goldStandardDict, clustersDesired)
 
     print precision
